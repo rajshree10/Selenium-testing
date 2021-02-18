@@ -1,139 +1,176 @@
-import sys
-
-gecko_folder_path = "C:\selenium\selenium-java\ChromeDriver\chromedriver.exe"
-sys.path.append(gecko_folder_path)
-import requests
+import os
+import time
+import unittest
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
-from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support.ui import Select
-import time
+from selenium.webdriver.common.action_chains import ActionChains
 
-driver = webdriver.Firefox()
-driver.get("https://www.thesparksfoundationsingapore.org/")
+path =  'C:\selenium\selenium-java\ChromeDriver\chromedriver.exe'
 
-print("\nLet's Check For The TestCases:\n")
 
-# TestCase 1: Title
-print("TestCase #1:")
-if (driver.title):
-    print("Title Verification Successful: ", driver.title)
-else:
-    print("Title Verification Failed!\n")
+def s2r(path):
+    return fr"{path}"
 
-# TestCase 2: Home button
-print("TestCase #2:")
-try:
-    driver.find_element_by_partial_link_text("The Sparks Foundation").click()
-    print("Home link works!\n")
-except NoSuchElementException:
-    print("Home Link Doesn't Work!\n")
 
-# TestCase 3: Check if navbar appears
-print("TestCase #3:")
-try:
-    driver.find_element_by_class_name("navbar")
-    print("Navbar Verification Successful!\n")
-except NoSuchElementException:
-    print("Navbar Verification Failed!\n")
+chrome_path = s2r(path)
 
-# TestCase 4: About Us Page
-print("TestCase #4:")
-try:
-    driver.find_element_by_link_text('About Us').click()
-    time.sleep(3)
-    driver.find_element_by_link_text('Vision, Mission and Values').click()
-    time.sleep(3)
-    print('Page visited Successfully!\n')
-except NoSuchElementException:
-    print("Page visit Failed! Does not exist.\n")
-    time.sleep(3)
 
-# TestCase 5: Policies and Code
-print('TestCase #5:')
-try:
-    driver.find_element_by_link_text('Policies and Code').click()
-    time.sleep(3)
-    driver.find_element_by_link_text("Policies").click()
-    time.sleep(3)
-    print('Policy page exists. Success!\n')
-except NoSuchElementException:
-    print('Policy Page Does not exist. Failed!\n')
-    time.sleep(3)
+class PythonOrgSearch(unittest.TestCase):
 
-# TestCase 6: Workshop page
-print('TestCase #6:')
-try:
-    driver.find_element_by_link_text('Programs').click()
-    time.sleep(3)
-    driver.find_element_by_link_text("Workshops").click()
-    time.sleep(3)
-    driver.find_element_by_link_text('LEARN MORE').click()
-    time.sleep(3)
-    print('Workshop Page Verified!\n')
-except NoSuchElementException:
-    print('No New Tab opened. Failed!\n')
+    def setUp(self):
+        self.driver = webdriver.Chrome(executable_path=chrome_path)
 
-# TestCase 7: Links Page
-print("TestCase #7")
-try:
-    driver.find_element_by_link_text('LINKS').click()
-    time.sleep(3)
-    driver.find_element_by_link_text('Software & App').click()
-    time.sleep(3)
-    driver.find_element_by_link_text('Visit LINKS @TSF').click()
-    time.sleep(3)
-    print('LINKS Verfication successful!\n')
-except NoSuchElementException:
-    print("LINKS Verification Failed!\n")
+    def test_Home_Page(self):
+        driver = self.driver
+        driver.get("https://www.thesparksfoundationsingapore.org")
 
-# TestCase 8: Check If Logo Exists
-print('TestCase #8:')
-try:
-    driver.find_element_by_xpath('//*[@id="home"]/div/div[1]/h1/a/*').click()
-    print('Found Logo! Success!\n')
-    time.sleep(3)
-except NoSuchElementException:
-    print('No logo found!\n')
+        # check the title
+        self.assertIn("The Sparks Foundation", driver.title)
 
-# TestCase 9:   Check the Form
-print("TestCase #9:")
-try:
-    driver.find_element_by_link_text('Join Us').click()
-    time.sleep(3)
-    driver.find_element_by_link_text('Why Join Us').click()
-    time.sleep(3)
-    driver.find_element_by_name('Name').send_keys('Aiman')
-    time.sleep(3)
-    driver.find_element_by_name('Email').send_keys('aiman@gmail.com')
-    time.sleep(3)
-    select = Select(driver.find_element_by_class_name('form-control'))
-    time.sleep(3)
-    select.select_by_visible_text('Student')
-    time.sleep(3)
-    driver.find_element_by_class_name('button-w3layouts').click()
-    time.sleep(3)
-    print("Form Verification Successful!\n")
-    time.sleep(3)
-except NoSuchElementException:
-    print("Form Verification Failed!\n")
-    time.sleep(3)
+        # check Navbar
+        navbar = driver.find_element_by_tag_name("nav")
+        navbar.is_displayed()
 
-# TestCase 10:   Check the Contact us Page
-print("TestCase #10:")
-try:
-    driver.find_element_by_link_text("Contact Us").click()
-    time.sleep(3)
-    info = driver.find_element_by_xpath('/html/body/div[2]/div/div/div[3]/div[2]/p[2]')
-    time.sleep(3)
+        # Check if logo is displayed
+        logo = driver.find_element_by_css_selector(
+            "a.col-md-6 > img:nth-child(1)")
+        logo.is_displayed()
 
-    # print(info.text)
-    if (info.text == "+65-8402-8590, info@thesparksfoundation.sg"):
-        print('contact Information Correct!')
-    else:
-        print('Contact Information Incorrect!')
+        time.sleep(2)
 
-    # assert driver.page_source.find("+65-8402-859, info@thesparksfoundation.sg")
-    print("Contact Page Verification Sucessful!\n")
-except NoSuchElementException:
-    print("Contact Page Verification unsuccessful!")
+    def test_About_Us_Page(self):
+        driver = self.driver
+        driver.get("https://www.thesparksfoundationsingapore.org")
+
+        # get about us dropdown on main page
+        about_us_dropdown = driver.find_element_by_xpath(
+            '//*[@id="link-effect-3"]/ul/li[1]/a')
+        # get news element
+        news = driver.find_element_by_xpath(
+            '//*[@id="link-effect-3"]/ul/li[1]/ul/li[7]/a')
+
+        # performing chain actions
+        action = ActionChains(driver)
+        action.move_to_element(about_us_dropdown).click(
+        ).move_to_element(news).click().perform()
+
+        # slowly scroll down the page
+        y = 250
+        for timer in range(0, 5):
+            driver.execute_script("window.scrollTo(0, "+str(y)+")")
+            y += 250
+            time.sleep(1)
+        time.sleep(1)
+        go_to_top = driver.find_element_by_xpath('//*[@id="toTop"]')
+        go_to_top.click()
+        time.sleep(2)
+
+    def test_Join_Us_Page(self):
+        driver = self.driver
+        driver.get("https://www.thesparksfoundationsingapore.org")
+
+        # get join us drop down element
+        join_us = driver.find_element_by_xpath(
+            '//*[@id="link-effect-3"]/ul/li[5]/a')
+
+        # get why join us element inside drop down
+        why_join_us = driver.find_element_by_xpath(
+            '//*[@id="link-effect-3"]/ul/li[5]/ul/li[1]/a')
+
+        # performing chain actions
+        ActionChains(driver).move_to_element(join_us).click(
+        ).move_to_element(why_join_us).click().perform()
+
+        # automated form filling
+        name = driver.find_element_by_xpath(
+            "/html/body/div[2]/div/div[2]/div[2]/div/form/input[1]"
+        )
+
+        contact = driver.find_element_by_xpath(
+            "/html/body/div[2]/div/div[2]/div[2]/div/form/input[2]"
+        )
+
+        role = driver.find_element_by_xpath(
+            "/html/body/div[2]/div/div[2]/div[2]/div/form/select"
+        )
+
+        # scroll
+        y = 250
+        for timer in range(0, 2):
+            driver.execute_script("window.scrollTo(0, "+str(y)+")")
+            y += 300
+            time.sleep(1)
+
+        # fill form
+        name.send_keys("Harsh")
+        time.sleep(2)
+
+        contact.send_keys("harsh@xyz.com")
+        time.sleep(2)
+
+        drp = Select(role)
+        drp.select_by_visible_text("Student")
+
+        go_to_top = driver.find_element_by_xpath('//*[@id="toTop"]')
+        go_to_top.click()
+        time.sleep(2)
+
+    def test_Programs_Page(self):
+
+        driver = self.driver
+        driver.get(
+            "https://www.thesparksfoundationsingapore.org"
+        )
+
+        # get join us drop down element
+        programs = driver.find_element_by_xpath(
+            '//*[@id="link-effect-3"]/ul/li[3]/a')
+
+        # get why join us element inside drop down
+        student_scholarship_program = driver.find_element_by_xpath(
+            '//*[@id="link-effect-3"]/ul/li[3]/ul/li[1]/a')
+
+        # performing chain actions
+        ActionChains(driver).move_to_element(programs).click(
+        ).move_to_element(student_scholarship_program).click().perform()
+
+        student_mentorship_program = driver.find_element_by_xpath(
+            '/html/body/div[2]/div/div[2]/div/ul/li[2]/a')
+
+        time.sleep(2)
+        student_mentorship_program.click()
+        time.sleep(1)
+
+        y = 250
+        for timer in range(0, 7):
+            driver.execute_script("window.scrollTo(0, "+str(y)+")")
+            y += 200
+            time.sleep(1)
+        time.sleep(1)
+        go_to_top = driver.find_element_by_xpath('//*[@id="toTop"]')
+        go_to_top.click()
+        time.sleep(2)
+
+    def test_Contact_Us_Page(self):
+        driver = self.driver
+        driver.get('https://www.thesparksfoundationsingapore.org')
+
+        contact_us = driver.find_element_by_xpath(
+            '//*[@id="link-effect-3"]/ul/li[6]/a')
+
+        contact_us.click()
+        time.sleep(1)
+
+        # check heading
+        heading = driver.find_element_by_class_name('inner-tittle-w3layouts')
+        heading_text = heading.text
+        # check heading is correct
+        self.assertIn("Contact Us", heading_text)
+
+    def tearDown(self):
+        self.driver.close()
+
+
+if __name__ == "__main__":
+    unittest.main()
